@@ -1,0 +1,94 @@
+import java.io.*;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+public class EditSentence {
+    public static void main(String[] args) throws IOException {
+
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Enter a file with text name: ");
+        String file = scan.nextLine();
+
+
+        String tempFileName = generateTempFileName();
+        File tempFile = new File(tempFileName);
+
+        copyFile(new File(file), tempFile);
+        editFile(tempFile);
+
+       copyFile(tempFile, new File(file));
+       tempFile.delete();
+    }
+
+
+    private static void copyFile(File source, File dest){
+        try{
+            Scanner reader = new Scanner(new FileInputStream(source));
+            PrintWriter writer = new PrintWriter(new FileOutputStream(dest));
+
+
+            while(reader.hasNextLine()){
+                writer.println(reader.nextLine());
+            }
+
+            reader.close();
+            writer.close();
+        }
+
+        catch (FileNotFoundException e){
+            System.out.println("Ups something wrong with the files!");
+            System.exit(0);
+        }
+        catch (NoSuchElementException e){
+            System.out.println("Ups something wrong with the files!");
+            System.exit(0);
+        }
+    }
+
+    private static String generateTempFileName() {
+        String Name = "Template";
+        int i = 1;
+        while (new File(Name + i + ".txt").exists()) {
+            i++;
+        }
+        return Name + i + ".txt";
+    }
+
+    private static void editFile(File file) {
+        Scanner reader = null;
+        PrintWriter writer = null;
+        try {
+            reader = new Scanner(new FileInputStream(file));
+            File outputFile = new File(file + ".out");
+            writer = new PrintWriter(new FileOutputStream(outputFile));
+        }
+        catch (FileNotFoundException e) {
+            System.out.println("Ups something its wrong with the edition!");
+            System.exit(0);
+        }
+        catch (NoSuchElementException e) {
+            System.out.println("Ups something wrong editing the files!");
+            System.exit(0);
+        }
+
+        while (reader.hasNextLine()) {
+            String line = reader.nextLine();
+            String[] sentences = line.split("\\.");
+
+
+            for (String sentence : sentences) {
+                if (!sentence.isEmpty()) {
+                    writer.write(sentence.trim());
+                    writer.write(".");
+                    writer.println();
+                }
+            }
+        }
+
+        reader.close();
+        writer.close();
+
+        file.delete();
+        new File(file + ".out").renameTo(file);
+    }
+}
